@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+
+    <Properties>
+        <property name="LOG_PATH" value="./target"/>
+        <property name="springAppName" value="product-service"/>
+    </Properties>
+
+    <Appenders>
+        <!-- Rolling log file appender -->
+        <RollingFile name="infoFileAppender" fileName="${LOG_PATH}/${springAppName}.log"
+                     filePattern="${LOG_PATH}/${springAppName}.log-%d{yyyy-MM-dd}-%i">
+            <PatternLayout>
+                <Pattern>
+                    [%d{yyyy-MM-dd HH:mm:ss:SSS}] %p [${springAppName}]-[%X{traceId},%X{spanId},%X{parentSpanId},%X{X-Span-Export}] [%t] %c{1}:%L - %m%n
+                </Pattern>
+            </PatternLayout>
+
+            <!-- Rolling policy based on file size -->
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500MB"/>
+            </Policies>
+            <!-- Keep max 100 log files -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Root logger configuration -->
+        <Root level="INFO">
+            <AppenderRef ref="infoFileAppender"/>
+        </Root>
+
+        <!-- Application specific logger (example) -->
+        <Logger name="com.example.marketmosaic" level="DEBUG">
+            <AppenderRef ref="infoFileAppender"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>
