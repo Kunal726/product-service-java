@@ -3,16 +3,12 @@ package com.projects.marketmosaic.dtos;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BaseRespDTO {
+public class AddBulkProductReqDTO {
 
-	private boolean status;
-
-	private int code;
-
-	private String message;
-
-	private String additionalInfo;
+	List<ProductDetailsDTO> products;
 
 }

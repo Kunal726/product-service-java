@@ -1,25 +1,26 @@
 package com.projects.marketmosaic.services;
 
 import com.projects.marketmosaic.dtos.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ProductService {
-    BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO);
 
-    BaseRespDTO addProducts(List<ProductDetailsDTO> productDetailsDTOList);
+	BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO);
 
-    BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO);
+	BaseRespDTO addProducts(@Valid AddBulkProductReqDTO productDetailsDTOList);
 
-    BaseRespDTO updateProducts(Map<Long, UpdateProductReqDTO> productReqDTOMap);
+	BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO);
 
-    BaseRespDTO deleteProduct(String productId, Boolean deactivate);
+	BaseRespDTO updateProducts(UpdateProductBulkReqDTO updateProductBulkReqDTO);
 
-    ProductRespDTO getProduct(String productId);
+	BaseRespDTO deleteProduct(String productId, Boolean deactivate);
 
-    ProductRespDTO getProductList(ProductFilterDTO productFilters);
+	ProductRespDTO getProduct(String productId);
 
-    List<String> getProductSuggestions(String query);
+	ProductRespDTO getProductList(ProductFilterDTO productFilters);
+
+	List<String> getProductSuggestions(String query);
+
 }
-

@@ -10,14 +10,16 @@ import java.util.List;
 @Data
 public class TagEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tag_id")
-    private Long tagId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "tag_id")
+	private Long tagId;
 
-    @Column(name = "tag_name", nullable = false)
-    private String tagName;
+	@Column(name = "tag_name", nullable = false)
+	private String tagName;
 
-    @ManyToMany(mappedBy = "tags") //no need to create the table just use it from the intermediate table
-    private List<ProductEntity> products;
+	@ManyToMany(mappedBy = "tags") // no need to create the table just use it from the
+									// intermediate table
+	private List<ProductEntity> products;
+
 }

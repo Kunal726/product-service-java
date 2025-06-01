@@ -1,21 +1,42 @@
 package com.projects.marketmosaic.dtos;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class UpdateProductReqDTO {
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
-    private Double price;
+	private String productName;
 
-    @Min(value = 0, message = "Stock must be greater than or equal to 0")
-    private Integer stock;
+	private String description;
 
-    @Size(max = 5, message = "Rating should be at most 5 characters")
-    private String rating;  // This could be a rating code, like "excellent"
+	private BigDecimal price;
+
+	private Integer stock;
+
+	private String rating;
+
+	private Boolean isActive;
+
+	private Long categoryId;
+
+	private List<Long> tagIds;
+
+	private List<ProductMediaUpdateDTO> mediaUpdates;
+
+	@Data
+	public static class ProductMediaUpdateDTO {
+
+		private String id; // Optional: existing media ID
+
+		private MultipartFile file; // Optional: new file (null implies delete if ID is
+									// present)
+
+		private String type; // Optional: for metadata or validation ("image"/"video")
+
+	}
+
 }
-

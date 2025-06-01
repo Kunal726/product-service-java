@@ -13,10 +13,11 @@ import java.util.List;
 @Transactional
 public interface ProductRepository extends JpaRepository<ProductEntity, Long>, CustomProductRepository {
 
-    @Modifying
-    @Query("UPDATE ProductEntity p SET p.isActive = false WHERE p.productId = :productId")
-    void softDelete(String productId);
+	@Modifying
+	@Query("UPDATE ProductEntity p SET p.isActive = false WHERE p.productId = :productId")
+	void softDelete(String productId);
 
-    @Query("SELECT DISTINCT p.productName FROM ProductEntity p WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%'))")
-    List<String> getProductSuggestions(String query);
+	@Query("SELECT DISTINCT p.productName FROM ProductEntity p WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%'))")
+	List<String> getProductSuggestions(String query);
+
 }

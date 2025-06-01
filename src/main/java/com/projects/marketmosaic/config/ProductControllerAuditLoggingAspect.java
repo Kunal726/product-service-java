@@ -14,20 +14,25 @@ import java.util.Arrays;
 @Component
 @Aspect
 public class ProductControllerAuditLoggingAspect {
-    private static final Logger logger = LoggerFactory.getLogger(ProductControllerAuditLoggingAspect.class);
 
-    @Before("execution(* com.projects.marketmosaic.controller.ProductController.*(..))")
-    public void logRequest(JoinPoint joinPoint) {
-        logger.info("Request to {} with arguments: {}", joinPoint.getSignature(), Arrays.toString(joinPoint.getArgs()));
-    }
+	private static final Logger logger = LoggerFactory.getLogger(ProductControllerAuditLoggingAspect.class);
 
-    @AfterReturning(value = "execution(* com.projects.marketmosaic.controller.ProductController.*(..))", returning = "result")
-    public void logResponse(JoinPoint joinPoint, Object result) {
-        logger.info("Response from {}: {}", joinPoint.getSignature(), result);
-    }
+	@Before("execution(* com.projects.marketmosaic.controller.ProductController.*(..))")
+	public void logRequest(JoinPoint joinPoint) {
+		logger.info("Request to {} with arguments: {}", joinPoint.getSignature(), Arrays.toString(joinPoint.getArgs()));
+	}
 
-    @AfterThrowing(value = "execution(* com.projects.marketmosaic.controller.ProductController.*(..))", throwing = "exception")
-    public void logException(JoinPoint joinPoint, Exception exception) {
-        logger.error("Exception thrown in method {} with message: {}", joinPoint.getSignature(), exception.getMessage());
-    }
+	@AfterReturning(value = "execution(* com.projects.marketmosaic.controller.ProductController.*(..))",
+			returning = "result")
+	public void logResponse(JoinPoint joinPoint, Object result) {
+		logger.info("Response from {}: {}", joinPoint.getSignature(), result);
+	}
+
+	@AfterThrowing(value = "execution(* com.projects.marketmosaic.controller.ProductController.*(..))",
+			throwing = "exception")
+	public void logException(JoinPoint joinPoint, Exception exception) {
+		logger.error("Exception thrown in method {} with message: {}", joinPoint.getSignature(),
+				exception.getMessage());
+	}
+
 }

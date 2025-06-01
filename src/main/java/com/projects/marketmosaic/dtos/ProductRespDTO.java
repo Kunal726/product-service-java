@@ -10,6 +10,9 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductRespDTO extends BaseRespDTO {
-    private List<ProductDetailsDTO> productList;
-    private ProductDetailsDTO product;
+
+	private List<ProductDetailsDTO> productList;
+
+	private ProductDetailsDTO product;
+
 }

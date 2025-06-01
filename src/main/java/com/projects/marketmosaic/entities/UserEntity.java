@@ -9,32 +9,26 @@ import java.time.LocalDateTime;
 @Table(name = "marketmosaic_users")
 @Data
 public class UserEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Auto-incrementing ID
-    @Column(name = "id")
-    private Long id;
 
-    @Column(name = "email")
-    private String email;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-incrementing ID
+	@Column(name = "id")
+	private Long id;
 
-    @Column(name = "name")
-    private String name;
+	@Column(name = "email")
+	private String email;
 
-    @Column(name = "roles")
-    private String roles;  // Can store roles as a comma-separated string or a more complex structure (e.g., List<String>)
+	@Column(name = "name")
+	private String name;
 
-    @Column(name = "business_name")
-    private String businessName;  // For suppliers
+	@Column(name = "roles")
+	private String roles; // Can store roles as a comma-separated string or a more complex
+							// structure (e.g., List<String>)
 
-    @Column(name = "contact_phone")
-    private String contactPhone;  // For suppliers
+	@Column(name = "date_added")
+	private LocalDateTime dateAdded;
 
-    @Column(name = "address")
-    private String address;  // For suppliers
+	@Column(name = "is_active")
+	private Boolean isActive;
 
-    @Column(name = "date_added")
-    private LocalDateTime dateAdded;
-
-    @Column(name = "is_active")
-    private Boolean isActive;
 }

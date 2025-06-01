@@ -19,76 +19,97 @@ import java.util.Locale;
 @Repository
 @RequiredArgsConstructor
 public class CustomProductRepositoryImpl implements CustomProductRepository {
-    //Using Criteria Api
-    private final EntityManager entityManager;
-    private final CategoryRepository categoryRepository;
 
-    @Override
-    public List<ProductEntity> findByFilters(ProductFilterDTO filters) {
+	// Using Criteria Api
+	private final EntityManager entityManager;
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder(); //getting The builder
-        CriteriaQuery<ProductEntity> criteriaQuery = criteriaBuilder.createQuery(ProductEntity.class); //creating query
-        Root<ProductEntity> productEntityRoot = criteriaQuery.from(ProductEntity.class); //getting root
-        List<Predicate> predicates = new ArrayList<>(); //List of the filters to add
+	private final CategoryRepository categoryRepository;
 
-        if (StringUtils.isNotBlank(filters.getSearchTerm())) {
-            String searchTerm = "%" + filters.getSearchTerm().toLowerCase(Locale.ROOT) + "%";
-            Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(productEntityRoot.get("productName")), searchTerm);
-            Predicate descriptionPredicate = criteriaBuilder.like(criteriaBuilder.lower(productEntityRoot.get("description")), searchTerm);
-            predicates.add(criteriaBuilder.or(namePredicate, descriptionPredicate));
-        }
+	@Override
+	public List<ProductEntity> findByFilters(ProductFilterDTO filters) {
 
-        if (filters.getSupplierId() != null) {
-            predicates.add(criteriaBuilder.equal(productEntityRoot.get("supplier").get("id"), filters.getSupplierId()));
-        }
-        if (filters.getPriceMin() != null && filters.getPriceMax() != null) {
-            predicates.add(criteriaBuilder.between(productEntityRoot.get("price"), filters.getPriceMin(), filters.getPriceMax()));
-        }
-        // Apply category filter if present
-        if (filters.getCategoryId() != null) {
-            // Fetch the category and its subcategories
-            CategoryEntity category = categoryRepository.findById(filters.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder(); // getting
+																				// The
+																				// builder
+		CriteriaQuery<ProductEntity> criteriaQuery = criteriaBuilder.createQuery(ProductEntity.class); // creating
+																										// query
+		Root<ProductEntity> productEntityRoot = criteriaQuery.from(ProductEntity.class); // getting
+																							// root
+		List<Predicate> predicates = new ArrayList<>(); // List of the filters to add
 
-            // Get all subcategories recursively (this can be done through a helper method or query)
-            List<CategoryEntity> allCategories = getAllSubcategories(category);
+		if (StringUtils.isNotBlank(filters.getSearchTerm())) {
+			String searchTerm = "%" + filters.getSearchTerm().toLowerCase(Locale.ROOT) + "%";
+			Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(productEntityRoot.get("productName")),
+					searchTerm);
+			Predicate descriptionPredicate = criteriaBuilder
+					.like(criteriaBuilder.lower(productEntityRoot.get("description")), searchTerm);
+			predicates.add(criteriaBuilder.or(namePredicate, descriptionPredicate));
+		}
 
-            // Add a predicate to filter by category and its subcategories
-            List<Long> categoryIds = allCategories.stream()
-                    .map(CategoryEntity::getCategoryId)
-                    .toList();
-            predicates.add(productEntityRoot.get("category").get("categoryId").in(categoryIds));
-        }
+		if (filters.getSupplierId() != null) {
+			predicates.add(criteriaBuilder.equal(productEntityRoot.get("supplier").get("id"), filters.getSupplierId()));
+		}
+		if (filters.getPriceMin() != null && filters.getPriceMax() != null) {
+			predicates.add(criteriaBuilder.between(productEntityRoot.get("price"), filters.getPriceMin(),
+					filters.getPriceMax()));
+		}
+		else if (filters.getPriceMin() != null) {
+			predicates.add(criteriaBuilder.ge(productEntityRoot.get("price"), filters.getPriceMin()));
+		}
+		else if (filters.getPriceMax() != null) {
+			predicates.add(criteriaBuilder.le(productEntityRoot.get("price"), filters.getPriceMax()));
+		}
+		// Apply category filter if present
+		if (filters.getCategoryId() != null) {
+			// Fetch the category and its subcategories
+			CategoryEntity category = categoryRepository.findById(filters.getCategoryId())
+					.orElseThrow(() -> new RuntimeException("Category not found"));
 
-        if (StringUtils.isNotBlank(filters.getRating())) {
-            Predicate ratingPredicate = criteriaBuilder.equal(productEntityRoot.get("rating"), filters.getRating());
-            predicates.add(ratingPredicate);
-        }
+			// Get all subcategories recursively (this can be done through a helper method
+			// or query)
+			List<CategoryEntity> allCategories = getAllSubcategories(category);
 
-        if (filters.getTags() != null && !filters.getTags().isEmpty()) {
-            Join<ProductEntity, TagEntity> tagsJoin = productEntityRoot.join("tags");
-            predicates.add(tagsJoin.get("tagId").in(filters.getTags())); // This checks if any of the tags in the list are associated with the product
-        }
+			// Add a predicate to filter by category and its subcategories
+			List<Long> categoryIds = allCategories.stream().map(CategoryEntity::getCategoryId).toList();
+			predicates.add(productEntityRoot.get("category").get("categoryId").in(categoryIds));
+		}
 
-        if (predicates.isEmpty()) {
-            return entityManager.createQuery(criteriaQuery).getResultList();
-        }
-        criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		if (StringUtils.isNotBlank(filters.getRating())) {
+			Predicate ratingPredicate = criteriaBuilder.equal(productEntityRoot.get("rating"), filters.getRating());
+			predicates.add(ratingPredicate);
+		}
 
+		if (filters.getTags() != null && !filters.getTags().isEmpty()) {
+			Join<ProductEntity, TagEntity> tagsJoin = productEntityRoot.join("tags");
+			predicates.add(tagsJoin.get("tagId").in(filters.getTags())); // This checks if
+																			// any of the
+																			// tags in the
+																			// list are
+																			// associated
+																			// with the
+																			// product
+		}
 
-        return entityManager.createQuery(criteriaQuery).getResultList();
-    }
+		if (predicates.isEmpty()) {
+			return entityManager.createQuery(criteriaQuery).getResultList();
+		}
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
-    private List<CategoryEntity> getAllSubcategories(CategoryEntity category) {
-        List<CategoryEntity> allCategories = new ArrayList<>();
-        allCategories.add(category);
+		return entityManager.createQuery(criteriaQuery).getResultList();
+	}
 
-        if (category.getSubCategories() != null) {
-            for (CategoryEntity subCategory : category.getSubCategories()) {
-                allCategories.addAll(getAllSubcategories(subCategory));  // Recursively add subcategories
-            }
-        }
+	private List<CategoryEntity> getAllSubcategories(CategoryEntity category) {
+		List<CategoryEntity> allCategories = new ArrayList<>();
+		allCategories.add(category);
 
-        return allCategories;
-    }
+		if (category.getSubCategories() != null) {
+			for (CategoryEntity subCategory : category.getSubCategories()) {
+				allCategories.addAll(getAllSubcategories(subCategory)); // Recursively add
+																		// subcategories
+			}
+		}
+
+		return allCategories;
+	}
+
 }
