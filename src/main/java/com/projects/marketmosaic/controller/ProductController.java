@@ -19,7 +19,7 @@ public class ProductController {
 
 	private final ProductService productService;
 
-	@PostMapping(path = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/seller/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	ResponseEntity<BaseRespDTO> addProduct(@ModelAttribute @Valid ProductDetailsDTO productDetailsDTO) {
 		log.info("AddProduct Request :: {} ", productDetailsDTO);
 		BaseRespDTO respDTO = productService.addProduct(productDetailsDTO);
@@ -27,7 +27,7 @@ public class ProductController {
 		return ResponseEntity.ok(respDTO);
 	}
 
-	@PostMapping(path = "/products/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/seller/products/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	ResponseEntity<BaseRespDTO> addProducts(@ModelAttribute @Valid AddBulkProductReqDTO addBulkProductReqDTO) {
 		log.info("AddProducts Request :: {} ", addBulkProductReqDTO.toString());
 		BaseRespDTO respDTO = productService.addProducts(addBulkProductReqDTO);
@@ -35,7 +35,7 @@ public class ProductController {
 		return ResponseEntity.ok(respDTO);
 	}
 
-	@PutMapping(path = "/products/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping(path = "/seller/products/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	ResponseEntity<BaseRespDTO> updateProduct(@PathVariable("productId") String productId,
 			@ModelAttribute @Valid UpdateProductReqDTO updateProductReqDTO) {
 		log.info("updateProduct Request :: {} ", updateProductReqDTO);
@@ -44,7 +44,7 @@ public class ProductController {
 		return ResponseEntity.ok(respDTO);
 	}
 
-	@PostMapping(path = "/products/bulk-update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/seller/products/bulk-update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	ResponseEntity<BaseRespDTO> updateProducts(@ModelAttribute UpdateProductBulkReqDTO updateProductBulkReqDTO) {
 		log.info("updateProducts Request :: {} ", updateProductBulkReqDTO);
 		BaseRespDTO respDTO = productService.updateProducts(updateProductBulkReqDTO);
@@ -52,7 +52,7 @@ public class ProductController {
 		return ResponseEntity.ok(respDTO);
 	}
 
-	@DeleteMapping(path = "/products/{productId}")
+	@DeleteMapping(path = "/seller/products/{productId}")
 	ResponseEntity<BaseRespDTO> deleteProduct(@PathVariable("productId") String productId,
 			@RequestParam(required = false) Boolean deactivate) {
 		log.info("DeleteProduct Request :: {} ", productId);

@@ -21,8 +21,8 @@ public class UserEntity {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "roles")
-	private String roles; // Can store roles as a comma-separated string or a more complex
+	@Column(name = "role")
+	private String role; // Can store roles as a comma-separated string or a more complex
 							// structure (e.g., List<String>)
 
 	@Column(name = "date_added")
