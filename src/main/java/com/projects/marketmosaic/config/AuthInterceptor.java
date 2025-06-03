@@ -61,6 +61,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 		}
 
 		request.setAttribute("userId", result.getUserId());
+		request.setAttribute("role", result.getAuthorities().getFirst());
 		return true;
 	}
 

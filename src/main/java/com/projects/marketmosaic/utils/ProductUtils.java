@@ -8,9 +8,11 @@ import com.projects.marketmosaic.repositories.CategoryRepository;
 import com.projects.marketmosaic.repositories.TagRepository;
 import com.projects.marketmosaic.repositories.UserRepository;
 import com.projects.marketmosaic.services.FileStorageService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,8 @@ public class ProductUtils {
 	private final TagRepository tagRepository;
 
 	private final FileStorageService fileStorageService;
+
+	private final UserUtils userUtils;
 
 	public ProductDetailsDTO mapProductDetails(ProductEntity productEntity) {
 		ProductDetailsDTO productDetailsDTO = new ProductDetailsDTO();
@@ -63,8 +67,8 @@ public class ProductUtils {
 	}
 
 	@Transactional(rollbackFor = RuntimeException.class)
-	public ProductEntity mapProductEntity(ProductDetailsDTO productDetailsDTO) {
-		UserEntity userEntity = userRepository.findById(productDetailsDTO.getSupplierId())
+	public ProductEntity mapProductEntity(ProductDetailsDTO productDetailsDTO, HttpServletRequest request) {
+		UserEntity userEntity = userRepository.findById(userUtils.getUserId(request))
 				.orElseThrow(() -> new RuntimeException("Supplier Not Found : " + productDetailsDTO.getSupplierId()));
 
 		CategoryEntity categoryEntity = categoryRepository.findById(productDetailsDTO.getCategoryId())
@@ -174,7 +178,14 @@ public class ProductUtils {
 		}
 	}
 
-	public void updateProduct(ProductEntity productEntity, UpdateProductReqDTO updateProductReqDTO) {
+	public void updateProduct(ProductEntity productEntity, UpdateProductReqDTO updateProductReqDTO,
+			HttpServletRequest request) {
+
+		Long userId = userUtils.getUserId(request);
+		String role = userUtils.getRole(request);
+		if (!productEntity.getSupplier().getId().equals(userId) && !"ADMIN".equals(role)) {
+			throw new ProductException("Unauthorized to edit this Product", HttpStatus.UNAUTHORIZED.value());
+		}
 
 		if (StringUtils.isNotBlank(updateProductReqDTO.getProductName())) {
 			if (updateProductReqDTO.getProductName().length() < 3

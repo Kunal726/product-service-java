@@ -8,6 +8,8 @@ import com.projects.marketmosaic.repositories.ProductRepository;
 import com.projects.marketmosaic.services.FileStorageService;
 import com.projects.marketmosaic.services.ProductService;
 import com.projects.marketmosaic.utils.ProductUtils;
+import com.projects.marketmosaic.utils.UserUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +33,14 @@ public class ProductServiceImpl implements ProductService {
 
 	private final FileStorageService fileStorageService;
 
+	private final UserUtils userUtils;
+
 	@Override
-	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO) {
+	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (productDetailsDTO != null) {
-				ProductEntity productEntity = productUtils.mapProductEntity(productDetailsDTO);
+				ProductEntity productEntity = productUtils.mapProductEntity(productDetailsDTO, request);
 				productRepository.saveAndFlush(productEntity);
 				respDTO.setStatus(true);
 				respDTO.setCode(HttpStatus.OK.value());
@@ -53,12 +57,12 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO) {
+	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (addBulkProductReqDTO.getProducts() != null && !addBulkProductReqDTO.getProducts().isEmpty()) {
 				List<ProductEntity> productEntityList = addBulkProductReqDTO.getProducts().stream()
-						.map(productUtils::mapProductEntity).toList();
+						.map(productDetailsDTO -> productUtils.mapProductEntity(productDetailsDTO, request)).toList();
 				productRepository.saveAllAndFlush(productEntityList);
 				respDTO.setStatus(true);
 				respDTO.setCode(HttpStatus.OK.value());
@@ -84,86 +88,75 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO) {
+	public BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO,
+			HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
-		try {
-			if (StringUtils.isNotBlank(productId) && updateProductReqDTO != null) {
-				ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
-						.orElseThrow(() -> new ProductException("Product Not Found", HttpStatus.NOT_FOUND.value()));
 
-				productUtils.updateProduct(productEntity, updateProductReqDTO);
+		if (StringUtils.isNotBlank(productId) && updateProductReqDTO != null) {
+			ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
+					.orElseThrow(() -> new ProductException("Product Not Found", HttpStatus.NOT_FOUND.value()));
 
-				productUtils.updateProductMedia(productEntity, updateProductReqDTO.getMediaUpdates());
+			productUtils.updateProduct(productEntity, updateProductReqDTO, request);
 
-				productRepository.save(productEntity);
-				respDTO.setStatus(true);
-				respDTO.setCode(HttpStatus.OK.value());
-				respDTO.setMessage("Product Updated");
-			}
+			productUtils.updateProductMedia(productEntity, updateProductReqDTO.getMediaUpdates());
+
+			productRepository.save(productEntity);
+			respDTO.setStatus(true);
+			respDTO.setCode(HttpStatus.OK.value());
+			respDTO.setMessage("Product Updated");
 		}
-		catch (ProductException e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(e.getErrorCode());
-		}
-		catch (RuntimeException e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
+
 		return respDTO;
 	}
 
 	@Override
-	public BaseRespDTO updateProducts(UpdateProductBulkReqDTO updateProductBulkReqDTO) {
+	public BaseRespDTO updateProducts(UpdateProductBulkReqDTO updateProductBulkReqDTO, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
-		try {
-			if (updateProductBulkReqDTO.getProducts().isEmpty())
-				throw new ProductException("Request map empty", HttpStatus.BAD_REQUEST.value());
 
-			Map<Long, UpdateProductReqDTO> productMap = updateProductBulkReqDTO.getProducts().stream()
-					.collect(Collectors.toMap(data -> Long.valueOf(data.getProductId()),
-							UpdateProductBulkReqDTO.UpdateProductData::getProduct));
-			List<Long> productIds = productMap.keySet().stream().toList();
-			List<ProductEntity> productsToUpdate = productRepository.findAllById(productIds);
+		if (updateProductBulkReqDTO.getProducts().isEmpty())
+			throw new ProductException("Request map empty", HttpStatus.BAD_REQUEST.value());
 
-			productsToUpdate.forEach(productEntity -> {
-				UpdateProductReqDTO updateProductReqDTO = productMap.get(productEntity.getProductId());
-				productUtils.updateProduct(productEntity, updateProductReqDTO);
-				productUtils.updateProductMedia(productEntity, updateProductReqDTO.getMediaUpdates());
-			});
+		Map<Long, UpdateProductReqDTO> productMap = updateProductBulkReqDTO.getProducts().stream()
+				.collect(Collectors.toMap(data -> Long.valueOf(data.getProductId()),
+						UpdateProductBulkReqDTO.UpdateProductData::getProduct));
+		List<Long> productIds = productMap.keySet().stream().toList();
+		List<ProductEntity> productsToUpdate = productRepository.findAllById(productIds);
 
-			productRepository.saveAll(productsToUpdate);
+		productsToUpdate.forEach(productEntity -> {
+			UpdateProductReqDTO updateProductReqDTO = productMap.get(productEntity.getProductId());
+			productUtils.updateProduct(productEntity, updateProductReqDTO, request);
+			productUtils.updateProductMedia(productEntity, updateProductReqDTO.getMediaUpdates());
+		});
 
-			// Return success response
-			respDTO.setStatus(true);
-			respDTO.setCode(HttpStatus.OK.value());
-			respDTO.setMessage("All products updated successfully");
-		}
-		catch (ProductException e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(e.getErrorCode());
-		}
-		catch (RuntimeException e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
+		productRepository.saveAll(productsToUpdate);
+
+		// Return success response
+		respDTO.setStatus(true);
+		respDTO.setCode(HttpStatus.OK.value());
+		respDTO.setMessage("All products updated successfully");
+
 		return respDTO;
 	}
 
 	@Override
 	@Transactional
-	public BaseRespDTO deleteProduct(String productId, Boolean deactivate) {
+	public BaseRespDTO deleteProduct(String productId, Boolean deactivate, HttpServletRequest request) {
 		BaseRespDTO baseRespDTO = new BaseRespDTO();
 		baseRespDTO.setMessage("ProductId is empty");
+
 		if (StringUtils.isNotBlank(productId)) {
+			String role = userUtils.getRole(request);
+			Long userId = userUtils.getUserId(request);
+
+			ProductEntity product = productRepository.findById(Long.valueOf(productId))
+					.orElseThrow(() -> new ProductException("Product Not Found", HttpStatus.NOT_FOUND.value()));
+
+			if (!product.getSupplier().getId().equals(userId) && !"ADMIN".equals(role)) {
+				throw new ProductException("Unauthorized to delete this Product", HttpStatus.UNAUTHORIZED.value());
+			}
+
 			if (deactivate == null || !deactivate) {
-				List<String> mediaPaths = productRepository
-						.findById(Long.valueOf(productId)).map(productEntity -> productEntity.getProductMedia().stream()
-								.map(ProductMediaEntity::getUrl).toList())
-						.orElseThrow(() -> new ProductException("Product Not Found"));
+				List<String> mediaPaths = product.getProductMedia().stream().map(ProductMediaEntity::getUrl).toList();
 				fileStorageService.deleteFiles(mediaPaths);
 				productRepository.deleteById(Long.valueOf(productId));
 			}
@@ -180,33 +173,23 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public ProductRespDTO getProduct(String productId) {
 		ProductRespDTO respDTO = new ProductRespDTO();
-		try {
-			if (StringUtils.isNotBlank(productId)) {
 
-				ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
-						.orElseThrow(() -> new ProductException(HttpStatus.NOT_FOUND.value(), "Product Not Found"));
+		if (StringUtils.isNotBlank(productId)) {
 
-				ProductDetailsDTO productDetailsDTO = productUtils.mapProductDetails(productEntity);
-				respDTO.setProduct(productDetailsDTO);
+			ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
+					.orElseThrow(() -> new ProductException(HttpStatus.NOT_FOUND.value(), "Product Not Found"));
 
-				respDTO.setStatus(true);
-				respDTO.setCode(HttpStatus.OK.value());
-				respDTO.setMessage("Product Found");
-			}
-			else {
-				throw new ProductException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Product Id cannot be empty");
-			}
+			ProductDetailsDTO productDetailsDTO = productUtils.mapProductDetails(productEntity);
+			respDTO.setProduct(productDetailsDTO);
+
+			respDTO.setStatus(true);
+			respDTO.setCode(HttpStatus.OK.value());
+			respDTO.setMessage("Product Found");
 		}
-		catch (ProductException e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(e.getErrorCode());
+		else {
+			throw new ProductException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Product Id cannot be empty");
 		}
-		catch (Exception e) {
-			log.error(e.getMessage());
-			respDTO.setMessage(e.getMessage());
-			respDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
+
 		return respDTO;
 	}
 
