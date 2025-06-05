@@ -52,7 +52,13 @@ public class AuthInterceptor implements HandlerInterceptor {
 			return false;
 		}
 
-		TokenValidationRespDTO result = authServiceClient.validateSeller("JWT_SESSION=" + jwtToken);
+		TokenValidationRespDTO result;
+
+		if(path.startsWith("/categories")) {
+			result = authServiceClient.validateAdmin("JWT_SESSION=" + jwtToken);
+		} else {
+			result = authServiceClient.validateSeller("JWT_SESSION=" + jwtToken);
+		}
 
 		if (!result.isValid()) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

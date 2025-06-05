@@ -13,7 +13,21 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(authInterceptor).addPathPatterns("/seller/**").excludePathPatterns("/products/**");
+		registry.addInterceptor(authInterceptor)
+				.addPathPatterns(
+						"/seller/**",
+						"/categories/add-category",
+						"/categories/update-category",
+						"/categories/delete-category",
+						"/tags/add-tags",
+						"/tags/update-tag",
+						"/tags/delete-tag"
+				)
+				.excludePathPatterns(
+						"/products/**",
+						"/categories",
+						"tags"
+				);
 	}
 
 }
