@@ -23,7 +23,7 @@ public class CategoryEntity {
 	@JoinColumn(name = "parent_id")
 	private CategoryEntity parentCategory;
 
-	@OneToMany(mappedBy = "parentCategory")
+	@OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CategoryEntity> subCategories;
 
 }

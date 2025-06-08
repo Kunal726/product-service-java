@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -21,19 +23,22 @@ public class ProductController {
 	private final ProductService productService;
 
 	@PostMapping(path = "/seller/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	ResponseEntity<BaseRespDTO> addProduct(@ModelAttribute @Valid ProductDetailsDTO productDetailsDTO,
+	ResponseEntity<BaseRespDTO> addProduct(@RequestPart("product") @Valid ProductDetailsDTO productDetailsDTO,
+			@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap,
 			HttpServletRequest request) {
 		log.info("AddProduct Request :: {} ", productDetailsDTO);
-		BaseRespDTO respDTO = productService.addProduct(productDetailsDTO, request);
+
+		BaseRespDTO respDTO = productService.addProduct(productDetailsDTO, mediaMap, request);
 		log.info("AddProduct Response :: {} ", respDTO);
 		return ResponseEntity.ok(respDTO);
 	}
 
 	@PostMapping(path = "/seller/products/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	ResponseEntity<BaseRespDTO> addProducts(@ModelAttribute @Valid AddBulkProductReqDTO addBulkProductReqDTO,
+	ResponseEntity<BaseRespDTO> addProducts(@RequestPart("bulkProducts") @Valid AddBulkProductReqDTO addBulkProductReqDTO,
+											@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap,
 			HttpServletRequest request) {
 		log.info("AddProducts Request :: {} ", addBulkProductReqDTO.toString());
-		BaseRespDTO respDTO = productService.addProducts(addBulkProductReqDTO, request);
+		BaseRespDTO respDTO = productService.addProducts(addBulkProductReqDTO, mediaMap, request);
 		log.info("AddProducts Response :: {} ", respDTO);
 		return ResponseEntity.ok(respDTO);
 	}
@@ -66,17 +71,17 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{productId}")
-	ResponseEntity<ProductRespDTO> getProduct(@PathVariable("productId") String productId) {
+	ResponseEntity<ProductRespDTO> getProduct(@PathVariable("productId") String productId, HttpServletRequest request) {
 		log.info("getProduct Request :: {} ", productId);
-		ProductRespDTO respDTO = productService.getProduct(productId);
+		ProductRespDTO respDTO = productService.getProduct(productId, request);
 		log.info("getProduct Response :: {} ", respDTO);
 		return ResponseEntity.ok(respDTO);
 	}
 
 	@GetMapping("/products")
-	ResponseEntity<ProductRespDTO> getProductList(@ModelAttribute ProductFilterDTO productFilterDTO) {
+	ResponseEntity<ProductRespDTO> getProductList(@ModelAttribute ProductFilterDTO productFilterDTO, HttpServletRequest request) {
 		log.info("getProductList Request : Filters :: {}", productFilterDTO);
-		ProductRespDTO respDTO = productService.getProductList(productFilterDTO);
+		ProductRespDTO respDTO = productService.getProductList(productFilterDTO, request);
 		log.info("getProductList Response :: {} ", respDTO);
 		return ResponseEntity.ok(respDTO);
 	}

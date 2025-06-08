@@ -1,9 +1,7 @@
 package com.projects.marketmosaic.controller;
 
 import com.projects.marketmosaic.common.dto.resp.BaseRespDTO;
-import com.projects.marketmosaic.dtos.CategoryDTO;
-import com.projects.marketmosaic.dtos.CategoryRespDTO;
-import com.projects.marketmosaic.dtos.TagDTO;
+import com.projects.marketmosaic.dtos.*;
 import com.projects.marketmosaic.services.CategoryService;
 import com.projects.marketmosaic.services.TagService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +26,7 @@ public class CategoryTagController {
     }
 
     @DeleteMapping(path = "/categories/delete-category")
-    ResponseEntity<BaseRespDTO> deleteCategory(@RequestBody CategoryDTO.Category category) {
+    ResponseEntity<BaseRespDTO> deleteCategory(@RequestBody Category category) {
         log.info("Delete Category ReqDTO {}", category);
         BaseRespDTO response = categoryService.deleteCategory(category);
         log.info("Delete Category RespDTO {}", response);
@@ -36,7 +34,7 @@ public class CategoryTagController {
     }
 
     @PatchMapping(path = "/categories/update-category")
-    ResponseEntity<BaseRespDTO> updateCategory(@RequestBody CategoryDTO.Category category) {
+    ResponseEntity<BaseRespDTO> updateCategory(@RequestBody Category category) {
         log.info("Update Category ReqDTO {}", category);
         BaseRespDTO response = categoryService.updateCategory(category);
         log.info("Update Category RespDTO {}", response);
@@ -59,7 +57,7 @@ public class CategoryTagController {
     }
 
     @DeleteMapping(path = "/tags/delete-tag")
-    ResponseEntity<BaseRespDTO> deleteTag(@RequestBody TagDTO.Tag tag) {
+    ResponseEntity<BaseRespDTO> deleteTag(@RequestBody Tag tag) {
         log.info("Delete Tag ReqDTO {}", tag);
         BaseRespDTO response = tagService.deleteTag(tag);
         log.info("Delete Tag RespDTO {}", response);
@@ -67,7 +65,7 @@ public class CategoryTagController {
     }
 
     @PatchMapping(path = "/tags/update-tag")
-    ResponseEntity<BaseRespDTO> addTag(@RequestBody TagDTO.Tag tag) {
+    ResponseEntity<BaseRespDTO> addTag(@RequestBody Tag tag) {
         log.info("Update Tag ReqDTO {}", tag);
         BaseRespDTO response = tagService.updateTag(tag);
         log.info("Update Tag RespDTO {}", response);

@@ -1,5 +1,6 @@
 package com.projects.marketmosaic.repositories;
 
+import com.projects.marketmosaic.entities.CategoryEntity;
 import com.projects.marketmosaic.entities.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,4 +21,5 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, C
 	@Query("SELECT DISTINCT p.productName FROM ProductEntity p WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%'))")
 	List<String> getProductSuggestions(String query);
 
+    boolean existsByCategory(CategoryEntity category);
 }

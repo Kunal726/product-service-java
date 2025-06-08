@@ -2,11 +2,14 @@ package com.projects.marketmosaic.services.impl;
 
 import com.projects.marketmosaic.common.dto.resp.BaseRespDTO;
 import com.projects.marketmosaic.constants.Constants;
+import com.projects.marketmosaic.dtos.Tag;
 import com.projects.marketmosaic.dtos.TagDTO;
+import com.projects.marketmosaic.entities.ProductEntity;
 import com.projects.marketmosaic.entities.TagEntity;
 import com.projects.marketmosaic.exception.ProductException;
 import com.projects.marketmosaic.repositories.TagRepository;
 import com.projects.marketmosaic.services.TagService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,18 +57,29 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public BaseRespDTO deleteTag(TagDTO.Tag tag) {
+    public BaseRespDTO deleteTag(Tag tag) {
         BaseRespDTO respDTO = new BaseRespDTO();
 
         try {
             if(tag != null && StringUtils.isNotBlank(tag.getId())) {
-                tagRepository.deleteById(Long.valueOf(tag.getId()));
+                TagEntity tagEntity = tagRepository.findById(Long.valueOf(tag.getId()))
+                        .orElseThrow(() -> new ProductException("Tag not found with ID: " + tag.getId(), HttpStatus.NOT_FOUND.value()));
+
+                for (ProductEntity product : tagEntity.getProducts()) {
+                    product.getTags().remove(tagEntity);
+                }
+
+                tagEntity.getProducts().clear();
+
+                tagRepository.delete(tagEntity);
 
                 respDTO.setMessage("Tag Deleted Successfully");
                 respDTO.setStatus(true);
                 respDTO.setCode("200");
             }
 
+        } catch (ProductException e) {
+            throw e;
         } catch (Exception e) {
             log.error(Constants.EXCEPTION, e.getMessage());
             throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -75,7 +89,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public BaseRespDTO updateTag(TagDTO.Tag tag) {
+    public BaseRespDTO updateTag(Tag tag) {
         BaseRespDTO respDTO = new BaseRespDTO();
 
         try {
@@ -110,9 +124,9 @@ public class TagServiceImpl implements TagService {
             List<TagEntity> tagsList = tagRepository.findAll();
 
             if(!tagsList.isEmpty()) {
-                List<TagDTO.Tag> tagList =tagsList.stream()
+                List<Tag> tagList =tagsList.stream()
                                 .map(tagEntity -> {
-                                    TagDTO.Tag tag = new TagDTO.Tag();
+                                    Tag tag = new Tag();
                                     tag.setId(String.valueOf(tagEntity.getTagId()));
                                     tag.setName(tagEntity.getTagName());
                                     return tag;

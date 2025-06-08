@@ -16,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addInterceptor(authInterceptor)
 				.addPathPatterns(
 						"/seller/**",
+						"/products/**",
 						"/categories/add-category",
 						"/categories/update-category",
 						"/categories/delete-category",
@@ -24,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
 						"/tags/delete-tag"
 				)
 				.excludePathPatterns(
-						"/products/**",
+						"/products/suggestions",
 						"/categories",
 						"tags"
 				);

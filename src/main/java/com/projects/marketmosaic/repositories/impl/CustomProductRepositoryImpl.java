@@ -26,7 +26,7 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
 	private final CategoryRepository categoryRepository;
 
 	@Override
-	public List<ProductEntity> findByFilters(ProductFilterDTO filters) {
+	public List<ProductEntity> findByFilters(ProductFilterDTO filters, String role) {
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder(); // getting
 																				// The
@@ -81,13 +81,11 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
 
 		if (filters.getTags() != null && !filters.getTags().isEmpty()) {
 			Join<ProductEntity, TagEntity> tagsJoin = productEntityRoot.join("tags");
-			predicates.add(tagsJoin.get("tagId").in(filters.getTags())); // This checks if
-																			// any of the
-																			// tags in the
-																			// list are
-																			// associated
-																			// with the
-																			// product
+			predicates.add(tagsJoin.get("tagId").in(filters.getTags()));
+		}
+
+		if("USER".equalsIgnoreCase(role)) {
+			predicates.add(criteriaBuilder.equal(productEntityRoot.get("isActive"), true));
 		}
 
 		if (predicates.isEmpty()) {

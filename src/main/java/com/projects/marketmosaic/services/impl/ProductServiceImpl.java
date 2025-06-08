@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -36,10 +38,24 @@ public class ProductServiceImpl implements ProductService {
 	private final UserUtils userUtils;
 
 	@Override
-	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, HttpServletRequest request) {
+	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (productDetailsDTO != null) {
+
+				if(mediaMap != null && !mediaMap.isEmpty() && productDetailsDTO.getProductMedia() != null && mediaMap.size() == productDetailsDTO.getProductMedia().size()) {
+					productDetailsDTO.getProductMedia().forEach(productMedia -> {
+						String key = productMedia.getMediaKey();
+						if(StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
+							MultipartFile file = mediaMap.getFirst(key);
+							productMedia.setMedia(file);
+							productMedia.setType(file.getContentType());
+						}
+					});
+				} else {
+					productDetailsDTO.setProductMedia(null);
+				}
+
 				ProductEntity productEntity = productUtils.mapProductEntity(productDetailsDTO, request);
 				productRepository.saveAndFlush(productEntity);
 				respDTO.setStatus(true);
@@ -57,12 +73,27 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO, HttpServletRequest request) {
+	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (addBulkProductReqDTO.getProducts() != null && !addBulkProductReqDTO.getProducts().isEmpty()) {
 				List<ProductEntity> productEntityList = addBulkProductReqDTO.getProducts().stream()
-						.map(productDetailsDTO -> productUtils.mapProductEntity(productDetailsDTO, request)).toList();
+						.map(productDetailsDTO -> {
+							if(mediaMap != null && !mediaMap.isEmpty() && productDetailsDTO.getProductMedia() != null) {
+								productDetailsDTO.getProductMedia().forEach(productMedia -> {
+									String key = productMedia.getMediaKey();
+									if(StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
+										MultipartFile file = mediaMap.getFirst(key);
+										productMedia.setMedia(file);
+										productMedia.setType(file.getContentType());
+									}
+								});
+							} else {
+								productDetailsDTO.setProductMedia(null);
+							}
+
+							return productUtils.mapProductEntity(productDetailsDTO, request);
+						}).toList();
 				productRepository.saveAllAndFlush(productEntityList);
 				respDTO.setStatus(true);
 				respDTO.setCode(HttpStatus.OK.value());
@@ -171,7 +202,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductRespDTO getProduct(String productId) {
+	public ProductRespDTO getProduct(String productId, HttpServletRequest request) {
 		ProductRespDTO respDTO = new ProductRespDTO();
 
 		if (StringUtils.isNotBlank(productId)) {
@@ -179,6 +210,9 @@ public class ProductServiceImpl implements ProductService {
 			ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
 					.orElseThrow(() -> new ProductException(HttpStatus.NOT_FOUND.value(), "Product Not Found"));
 
+			if(userUtils.getRole(request).equalsIgnoreCase("USER") && !productEntity.getIsActive()) {
+				throw new ProductException(HttpStatus.OK.value(), "Product Not Available");
+			}
 			ProductDetailsDTO productDetailsDTO = productUtils.mapProductDetails(productEntity);
 			respDTO.setProduct(productDetailsDTO);
 
@@ -194,10 +228,10 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductRespDTO getProductList(ProductFilterDTO productFilters) {
+	public ProductRespDTO getProductList(ProductFilterDTO productFilters, HttpServletRequest request) {
 		ProductRespDTO respDTO = new ProductRespDTO();
 
-		List<ProductEntity> productEntities = productRepository.findByFilters(productFilters);
+		List<ProductEntity> productEntities = productRepository.findByFilters(productFilters, userUtils.getRole(request));
 
 		List<ProductDetailsDTO> productDetailsList = productEntities.stream().map(productUtils::mapProductDetails)
 				.toList();

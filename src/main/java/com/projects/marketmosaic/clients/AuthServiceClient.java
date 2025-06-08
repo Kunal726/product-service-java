@@ -15,4 +15,7 @@ public interface AuthServiceClient {
 	@GetMapping("/auth/validate-admin")
 	TokenValidationRespDTO validateAdmin(@RequestHeader("Cookie") String token);
 
+	@GetMapping("/auth/validate-user")
+	TokenValidationRespDTO validateUser(@RequestHeader("Cookie") String token);
+
 }

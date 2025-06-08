@@ -8,14 +8,9 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TagDTO extends BaseRespDTO {
 
     private List<Tag> tags;
 
-    @Data
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Tag {
-        private String id;
-        private String name;
-    }
 }

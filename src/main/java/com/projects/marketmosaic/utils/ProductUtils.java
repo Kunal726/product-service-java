@@ -42,14 +42,15 @@ public class ProductUtils {
 
 		productDetailsDTO.setProductId(productEntity.getProductId());
 		productDetailsDTO.setProductName(productEntity.getProductName());
-		productDetailsDTO.setCategoryId(productEntity.getCategory().getCategoryId());
+		productDetailsDTO.setCategory(new ProductDetailsDTO.IdNameDto(productEntity.getCategory().getCategoryId(), productEntity.getCategory().getCategoryName()));
 		productDetailsDTO.setPrice(productEntity.getPrice());
 		productDetailsDTO.setDescription(productEntity.getDescription());
 		productDetailsDTO.setIsActive(productEntity.getIsActive());
 		productDetailsDTO.setStockQuantity(productEntity.getStockQuantity());
-		productDetailsDTO.setSupplierId(productEntity.getSupplier().getId());
-		productDetailsDTO.setTagIds(Optional.ofNullable(productEntity.getTags()).filter(tags -> !tags.isEmpty())
-				.map(tagEntities -> tagEntities.stream().map(TagEntity::getTagId).toList()).orElse(new ArrayList<>()));
+		productDetailsDTO.setSupplierName(productEntity.getSupplier().getName());
+		productDetailsDTO.setTags(Optional.ofNullable(productEntity.getTags()).filter(tags -> !tags.isEmpty())
+				.map(tagEntities -> tagEntities.stream().map(tagEntity -> new ProductDetailsDTO.IdNameDto(tagEntity.getTagId(), tagEntity.getTagName())).toList())
+				.orElse(new ArrayList<>()));
 
 		List<ProductDetailsDTO.ProductMedia> productMediaList = productEntity.getProductMedia().stream()
 				.map(productMediaEntity -> {
@@ -69,9 +70,9 @@ public class ProductUtils {
 	@Transactional(rollbackFor = RuntimeException.class)
 	public ProductEntity mapProductEntity(ProductDetailsDTO productDetailsDTO, HttpServletRequest request) {
 		UserEntity userEntity = userRepository.findById(userUtils.getUserId(request))
-				.orElseThrow(() -> new RuntimeException("Supplier Not Found : " + productDetailsDTO.getSupplierId()));
+				.orElseThrow(() -> new RuntimeException("Supplier Not Found"));
 
-		CategoryEntity categoryEntity = categoryRepository.findById(productDetailsDTO.getCategoryId())
+		CategoryEntity categoryEntity = categoryRepository.findById(productDetailsDTO.getCategory().getId())
 				.orElseThrow(() -> new RuntimeException("Category not found"));
 
 		ProductEntity productEntity = new ProductEntity();
@@ -85,10 +86,11 @@ public class ProductUtils {
 		productEntity.setSupplier(userEntity);
 		productEntity.setDateAdded(LocalDateTime.now());
 
-		if (productDetailsDTO.getTagIds() != null && !productDetailsDTO.getTagIds().isEmpty()) {
-			List<TagEntity> tagEntityList = tagRepository.findAllById(productDetailsDTO.getTagIds());
+		if (productDetailsDTO.getTags() != null && !productDetailsDTO.getTags().isEmpty()) {
+			List<Long> tagIds = productDetailsDTO.getTags().stream().map(ProductDetailsDTO.IdNameDto::getId).toList();
+			List<TagEntity> tagEntityList = tagRepository.findAllById(tagIds);
 			if (tagEntityList.isEmpty()) {
-				log.error("Tags Not Found {}", productDetailsDTO.getTagIds());
+				log.error("Tags Not Found {}", tagIds);
 			}
 			productEntity.setTags(tagEntityList);
 		}

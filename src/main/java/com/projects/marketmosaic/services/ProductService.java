@@ -3,14 +3,16 @@ package com.projects.marketmosaic.services;
 import com.projects.marketmosaic.dtos.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface ProductService {
 
-	BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, HttpServletRequest request);
+	BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request);
 
-	BaseRespDTO addProducts(@Valid AddBulkProductReqDTO productDetailsDTOList, HttpServletRequest request);
+	BaseRespDTO addProducts(@Valid AddBulkProductReqDTO productDetailsDTOList, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request);
 
 	BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO, HttpServletRequest request);
 
@@ -18,9 +20,9 @@ public interface ProductService {
 
 	BaseRespDTO deleteProduct(String productId, Boolean deactivate, HttpServletRequest request);
 
-	ProductRespDTO getProduct(String productId);
+	ProductRespDTO getProduct(String productId, HttpServletRequest request);
 
-	ProductRespDTO getProductList(ProductFilterDTO productFilters);
+	ProductRespDTO getProductList(ProductFilterDTO productFilters, HttpServletRequest request);
 
 	List<String> getProductSuggestions(String query);
 

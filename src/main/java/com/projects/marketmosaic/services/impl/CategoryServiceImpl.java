@@ -2,18 +2,22 @@ package com.projects.marketmosaic.services.impl;
 
 import com.projects.marketmosaic.common.dto.resp.BaseRespDTO;
 import com.projects.marketmosaic.constants.Constants;
+import com.projects.marketmosaic.dtos.Category;
 import com.projects.marketmosaic.dtos.CategoryDTO;
 import com.projects.marketmosaic.dtos.CategoryDataDTO;
 import com.projects.marketmosaic.dtos.CategoryRespDTO;
 import com.projects.marketmosaic.entities.CategoryEntity;
 import com.projects.marketmosaic.exception.ProductException;
 import com.projects.marketmosaic.repositories.CategoryRepository;
+import com.projects.marketmosaic.repositories.ProductRepository;
 import com.projects.marketmosaic.services.CategoryService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import java.util.Map;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     @Override
     public BaseRespDTO addCategories(CategoryDTO categoryDTO) {
@@ -71,18 +76,28 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public BaseRespDTO deleteCategory(CategoryDTO.Category category) {
+    @Transactional
+    public BaseRespDTO deleteCategory(Category category) {
         BaseRespDTO respDTO = new BaseRespDTO();
 
         try {
             if(category != null && StringUtils.isNotBlank(category.getId())) {
                 Long categoryId = Long.parseLong(category.getId());
-                categoryRepository.deleteById(categoryId);
+                CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new ProductException("Category not found", HttpStatus.NOT_FOUND.value()));
+
+                if (isCategoryAssignedToProduct(categoryEntity)) {
+                    throw new ProductException("Cannot delete category: it is assigned to one or more products.", HttpStatus.FORBIDDEN.value());
+                }
+
+                categoryRepository.delete(categoryEntity);
 
                 respDTO.setMessage("Category Deleted Successfully");
                 respDTO.setCode("200");
                 respDTO.setStatus(true);
             }
+        } catch (ProductException e) {
+            throw e;
         } catch (Exception e) {
             log.error(Constants.EXCEPTION, e.getMessage());
             throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -91,8 +106,21 @@ public class CategoryServiceImpl implements CategoryService {
         return respDTO;
     }
 
+    private boolean isCategoryAssignedToProduct(CategoryEntity category) {
+        // Check main category
+        boolean assignedToProducts = productRepository.existsByCategory(category);
+        if (assignedToProducts) return true;
+
+        // Check subcategories recursively
+        for (CategoryEntity sub : category.getSubCategories()) {
+            if (isCategoryAssignedToProduct(sub)) return true;
+        }
+
+        return false;
+    }
+
     @Override
-    public BaseRespDTO updateCategory(CategoryDTO.Category category) {
+    public BaseRespDTO updateCategory(Category category) {
         BaseRespDTO respDTO = new BaseRespDTO();
 
         try {

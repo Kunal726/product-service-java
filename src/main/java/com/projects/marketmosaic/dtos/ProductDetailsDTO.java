@@ -2,6 +2,7 @@ package com.projects.marketmosaic.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,17 +26,17 @@ public class ProductDetailsDTO {
 	@DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
 	private BigDecimal price;
 
-	@NotNull(message = "Category ID cannot be null")
-	private Long categoryId;
+	@NotNull(message = "Category cannot be null")
+	private IdNameDto category;
 
 	@Min(value = 0, message = "Stock quantity must be greater than or equal to 0")
 	private Integer stockQuantity;
 
-	private Long supplierId;
+	private String supplierName;
 
 	private Boolean isActive;
 
-	private List<Long> tagIds;
+	private List<IdNameDto> tags;
 
 	private List<ProductMedia> productMedia;
 
@@ -47,6 +48,8 @@ public class ProductDetailsDTO {
 
 		private String id;
 
+		private String mediaKey;
+
 		private String url;
 
 		private String altText;
@@ -55,6 +58,14 @@ public class ProductDetailsDTO {
 
 		private MultipartFile media;
 
+	}
+
+	@Data
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@AllArgsConstructor
+	public static class IdNameDto {
+		private Long id;
+		private String name;
 	}
 
 }

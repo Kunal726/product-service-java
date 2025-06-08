@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface CustomProductRepository {
 
-	List<ProductEntity> findByFilters(ProductFilterDTO productFilterDTO);
+	List<ProductEntity> findByFilters(ProductFilterDTO productFilterDTO, String role);
 
 }

@@ -2,13 +2,10 @@ package com.projects.marketmosaic.config;
 
 import com.projects.marketmosaic.clients.AuthServiceClient;
 import com.projects.marketmosaic.common.dto.resp.TokenValidationRespDTO;
-import feign.FeignException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -56,6 +53,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 		if(path.startsWith("/categories")) {
 			result = authServiceClient.validateAdmin("JWT_SESSION=" + jwtToken);
+		} else if (path.startsWith("/products")) {
+			result = authServiceClient.validateUser("JWT_SESSION=" + jwtToken);
 		} else {
 			result = authServiceClient.validateSeller("JWT_SESSION=" + jwtToken);
 		}
