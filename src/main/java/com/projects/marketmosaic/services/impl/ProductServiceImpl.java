@@ -1,6 +1,8 @@
 package com.projects.marketmosaic.services.impl;
 
+import com.projects.marketmosaic.common.dto.product.resp.ProductDetailsDTO;
 import com.projects.marketmosaic.dtos.*;
+import com.projects.marketmosaic.common.dto.product.resp.ProductRespDTO;
 import com.projects.marketmosaic.entities.ProductEntity;
 import com.projects.marketmosaic.entities.ProductMediaEntity;
 import com.projects.marketmosaic.exception.ProductException;
@@ -223,7 +225,7 @@ public class ProductServiceImpl implements ProductService {
 			respDTO.setProduct(productDetailsDTO);
 
 			respDTO.setStatus(true);
-			respDTO.setCode(HttpStatus.OK.value());
+			respDTO.setCode(String.valueOf(HttpStatus.OK.value()));
 			respDTO.setMessage("Product Found");
 		}
 		else {
@@ -245,7 +247,7 @@ public class ProductServiceImpl implements ProductService {
 		respDTO.setProductList(productDetailsList);
 
 		respDTO.setStatus(true);
-		respDTO.setCode(HttpStatus.OK.value());
+		respDTO.setCode(String.valueOf(HttpStatus.OK.value()));
 		respDTO.setMessage("Product List : Entries " + productDetailsList.size());
 
 		return respDTO;

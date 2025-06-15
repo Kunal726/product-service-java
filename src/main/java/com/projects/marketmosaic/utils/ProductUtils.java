@@ -1,6 +1,6 @@
 package com.projects.marketmosaic.utils;
 
-import com.projects.marketmosaic.dtos.ProductDetailsDTO;
+import com.projects.marketmosaic.common.dto.product.resp.ProductDetailsDTO;
 import com.projects.marketmosaic.dtos.UpdateProductReqDTO;
 import com.projects.marketmosaic.entities.*;
 import com.projects.marketmosaic.exception.ProductException;

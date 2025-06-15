@@ -1,6 +1,8 @@
 package com.projects.marketmosaic.controller;
 
+import com.projects.marketmosaic.common.dto.product.resp.ProductDetailsDTO;
 import com.projects.marketmosaic.dtos.*;
+import com.projects.marketmosaic.common.dto.product.resp.ProductRespDTO;
 import com.projects.marketmosaic.services.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
