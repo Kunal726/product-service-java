@@ -6,12 +6,13 @@ import com.projects.marketmosaic.dtos.CategoryDTO;
 import com.projects.marketmosaic.dtos.CategoryRespDTO;
 
 public interface CategoryService {
-    BaseRespDTO addCategories(CategoryDTO categoryDTO);
 
-    BaseRespDTO deleteCategory(Category category);
+	BaseRespDTO addCategories(CategoryDTO categoryDTO);
 
-    BaseRespDTO updateCategory(Category category);
+	BaseRespDTO deleteCategory(Category category);
 
-    CategoryRespDTO getCategories();
+	BaseRespDTO updateCategory(Category category);
+
+	CategoryRespDTO getCategories();
 
 }

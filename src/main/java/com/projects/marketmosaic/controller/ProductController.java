@@ -24,8 +24,7 @@ public class ProductController {
 
 	@PostMapping(path = "/seller/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	ResponseEntity<BaseRespDTO> addProduct(@RequestPart("product") @Valid ProductDetailsDTO productDetailsDTO,
-			@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap,
-			HttpServletRequest request) {
+			@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
 		log.info("AddProduct Request :: {} ", productDetailsDTO);
 
 		BaseRespDTO respDTO = productService.addProduct(productDetailsDTO, mediaMap, request);
@@ -34,9 +33,9 @@ public class ProductController {
 	}
 
 	@PostMapping(path = "/seller/products/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	ResponseEntity<BaseRespDTO> addProducts(@RequestPart("bulkProducts") @Valid AddBulkProductReqDTO addBulkProductReqDTO,
-											@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap,
-			HttpServletRequest request) {
+	ResponseEntity<BaseRespDTO> addProducts(
+			@RequestPart("bulkProducts") @Valid AddBulkProductReqDTO addBulkProductReqDTO,
+			@RequestParam(required = false) MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
 		log.info("AddProducts Request :: {} ", addBulkProductReqDTO.toString());
 		BaseRespDTO respDTO = productService.addProducts(addBulkProductReqDTO, mediaMap, request);
 		log.info("AddProducts Response :: {} ", respDTO);
@@ -79,7 +78,8 @@ public class ProductController {
 	}
 
 	@GetMapping("/products")
-	ResponseEntity<ProductRespDTO> getProductList(@ModelAttribute ProductFilterDTO productFilterDTO, HttpServletRequest request) {
+	ResponseEntity<ProductRespDTO> getProductList(@ModelAttribute ProductFilterDTO productFilterDTO,
+			HttpServletRequest request) {
 		log.info("getProductList Request : Filters :: {}", productFilterDTO);
 		ProductRespDTO respDTO = productService.getProductList(productFilterDTO, request);
 		log.info("getProductList Response :: {} ", respDTO);

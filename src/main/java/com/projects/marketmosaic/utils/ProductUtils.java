@@ -42,15 +42,23 @@ public class ProductUtils {
 
 		productDetailsDTO.setProductId(productEntity.getProductId());
 		productDetailsDTO.setProductName(productEntity.getProductName());
-		productDetailsDTO.setCategory(new ProductDetailsDTO.IdNameDto(productEntity.getCategory().getCategoryId(), productEntity.getCategory().getCategoryName()));
+		productDetailsDTO.setCategory(new ProductDetailsDTO.IdNameDto(productEntity.getCategory().getCategoryId(),
+				productEntity.getCategory().getCategoryName()));
 		productDetailsDTO.setPrice(productEntity.getPrice());
 		productDetailsDTO.setDescription(productEntity.getDescription());
 		productDetailsDTO.setIsActive(productEntity.getIsActive());
 		productDetailsDTO.setStockQuantity(productEntity.getStockQuantity());
 		productDetailsDTO.setSupplierName(productEntity.getSupplier().getName());
-		productDetailsDTO.setTags(Optional.ofNullable(productEntity.getTags()).filter(tags -> !tags.isEmpty())
-				.map(tagEntities -> tagEntities.stream().map(tagEntity -> new ProductDetailsDTO.IdNameDto(tagEntity.getTagId(), tagEntity.getTagName())).toList())
-				.orElse(new ArrayList<>()));
+		productDetailsDTO
+				.setTags(Optional
+						.ofNullable(
+								productEntity.getTags())
+						.filter(tags -> !tags.isEmpty())
+						.map(tagEntities -> tagEntities.stream()
+								.map(tagEntity -> new ProductDetailsDTO.IdNameDto(tagEntity.getTagId(),
+										tagEntity.getTagName()))
+								.toList())
+						.orElse(new ArrayList<>()));
 
 		List<ProductDetailsDTO.ProductMedia> productMediaList = productEntity.getProductMedia().stream()
 				.map(productMediaEntity -> {

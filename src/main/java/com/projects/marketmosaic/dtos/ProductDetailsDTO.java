@@ -64,8 +64,11 @@ public class ProductDetailsDTO {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@AllArgsConstructor
 	public static class IdNameDto {
+
 		private Long id;
+
 		private String name;
+
 	}
 
 }

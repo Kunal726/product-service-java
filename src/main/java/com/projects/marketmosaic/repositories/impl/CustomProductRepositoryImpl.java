@@ -84,9 +84,10 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
 			predicates.add(tagsJoin.get("tagId").in(filters.getTags()));
 		}
 
-		if("USER".equalsIgnoreCase(role)) {
+		if ("USER".equalsIgnoreCase(role)) {
 			predicates.add(criteriaBuilder.equal(productEntityRoot.get("isActive"), true));
 		}
+
 
 		if (predicates.isEmpty()) {
 			return entityManager.createQuery(criteriaQuery).getResultList();

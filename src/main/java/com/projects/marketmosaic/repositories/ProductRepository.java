@@ -21,5 +21,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, C
 	@Query("SELECT DISTINCT p.productName FROM ProductEntity p WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%'))")
 	List<String> getProductSuggestions(String query);
 
-    boolean existsByCategory(CategoryEntity category);
+	boolean existsByCategory(CategoryEntity category);
+
 }

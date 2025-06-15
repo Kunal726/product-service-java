@@ -38,21 +38,24 @@ public class ProductServiceImpl implements ProductService {
 	private final UserUtils userUtils;
 
 	@Override
-	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
+	public BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap,
+			HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (productDetailsDTO != null) {
 
-				if(mediaMap != null && !mediaMap.isEmpty() && productDetailsDTO.getProductMedia() != null && mediaMap.size() == productDetailsDTO.getProductMedia().size()) {
+				if (mediaMap != null && !mediaMap.isEmpty() && productDetailsDTO.getProductMedia() != null
+						&& mediaMap.size() == productDetailsDTO.getProductMedia().size()) {
 					productDetailsDTO.getProductMedia().forEach(productMedia -> {
 						String key = productMedia.getMediaKey();
-						if(StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
+						if (StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
 							MultipartFile file = mediaMap.getFirst(key);
 							productMedia.setMedia(file);
 							productMedia.setType(file.getContentType());
 						}
 					});
-				} else {
+				}
+				else {
 					productDetailsDTO.setProductMedia(null);
 				}
 
@@ -73,22 +76,25 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
+	public BaseRespDTO addProducts(@Valid AddBulkProductReqDTO addBulkProductReqDTO,
+			MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request) {
 		BaseRespDTO respDTO = new BaseRespDTO();
 		try {
 			if (addBulkProductReqDTO.getProducts() != null && !addBulkProductReqDTO.getProducts().isEmpty()) {
 				List<ProductEntity> productEntityList = addBulkProductReqDTO.getProducts().stream()
 						.map(productDetailsDTO -> {
-							if(mediaMap != null && !mediaMap.isEmpty() && productDetailsDTO.getProductMedia() != null) {
+							if (mediaMap != null && !mediaMap.isEmpty()
+									&& productDetailsDTO.getProductMedia() != null) {
 								productDetailsDTO.getProductMedia().forEach(productMedia -> {
 									String key = productMedia.getMediaKey();
-									if(StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
+									if (StringUtils.isNotBlank(key) && mediaMap.containsKey(key)) {
 										MultipartFile file = mediaMap.getFirst(key);
 										productMedia.setMedia(file);
 										productMedia.setType(file.getContentType());
 									}
 								});
-							} else {
+							}
+							else {
 								productDetailsDTO.setProductMedia(null);
 							}
 
@@ -210,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
 			ProductEntity productEntity = productRepository.findById(Long.valueOf(productId))
 					.orElseThrow(() -> new ProductException(HttpStatus.NOT_FOUND.value(), "Product Not Found"));
 
-			if(userUtils.getRole(request).equalsIgnoreCase("USER") && !productEntity.getIsActive()) {
+			if (userUtils.getRole(request).equalsIgnoreCase("USER") && !productEntity.getIsActive()) {
 				throw new ProductException(HttpStatus.OK.value(), "Product Not Available");
 			}
 			ProductDetailsDTO productDetailsDTO = productUtils.mapProductDetails(productEntity);
@@ -231,7 +237,8 @@ public class ProductServiceImpl implements ProductService {
 	public ProductRespDTO getProductList(ProductFilterDTO productFilters, HttpServletRequest request) {
 		ProductRespDTO respDTO = new ProductRespDTO();
 
-		List<ProductEntity> productEntities = productRepository.findByFilters(productFilters, userUtils.getRole(request));
+		List<ProductEntity> productEntities = productRepository.findByFilters(productFilters,
+				userUtils.getRole(request));
 
 		List<ProductDetailsDTO> productDetailsList = productEntities.stream().map(productUtils::mapProductDetails)
 				.toList();

@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface ProductService {
 
-	BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request);
+	BaseRespDTO addProduct(ProductDetailsDTO productDetailsDTO, MultiValueMap<String, MultipartFile> mediaMap,
+			HttpServletRequest request);
 
-	BaseRespDTO addProducts(@Valid AddBulkProductReqDTO productDetailsDTOList, MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request);
+	BaseRespDTO addProducts(@Valid AddBulkProductReqDTO productDetailsDTOList,
+			MultiValueMap<String, MultipartFile> mediaMap, HttpServletRequest request);
 
 	BaseRespDTO updateProduct(String productId, UpdateProductReqDTO updateProductReqDTO, HttpServletRequest request);
 

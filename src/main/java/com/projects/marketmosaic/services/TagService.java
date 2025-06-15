@@ -5,11 +5,13 @@ import com.projects.marketmosaic.dtos.Tag;
 import com.projects.marketmosaic.dtos.TagDTO;
 
 public interface TagService {
-    BaseRespDTO addTags(TagDTO tagDTO);
 
-    BaseRespDTO deleteTag(Tag tag);
+	BaseRespDTO addTags(TagDTO tagDTO);
 
-    BaseRespDTO updateTag(Tag tag);
+	BaseRespDTO deleteTag(Tag tag);
 
-    TagDTO getTags();
+	BaseRespDTO updateTag(Tag tag);
+
+	TagDTO getTags();
+
 }

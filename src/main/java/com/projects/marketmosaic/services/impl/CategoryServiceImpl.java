@@ -29,182 +29,195 @@ import java.util.Map;
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository;
+	private final CategoryRepository categoryRepository;
 
-    @Override
-    public BaseRespDTO addCategories(CategoryDTO categoryDTO) {
-        BaseRespDTO respDTO = new BaseRespDTO();
+	private final ProductRepository productRepository;
 
-        try {
+	@Override
+	public BaseRespDTO addCategories(CategoryDTO categoryDTO) {
+		BaseRespDTO respDTO = new BaseRespDTO();
 
-            if (categoryDTO != null && categoryDTO.getCategories() != null) {
+		try {
 
-                List<CategoryEntity> categories = new ArrayList<>();
+			if (categoryDTO != null && categoryDTO.getCategories() != null) {
 
-                categoryDTO.getCategories().forEach(category -> {
-                    CategoryEntity categoryEntity = new CategoryEntity();
-                    categoryEntity.setCategoryName(category.getCategoryName());
+				List<CategoryEntity> categories = new ArrayList<>();
 
-                    if (StringUtils.isNotBlank(category.getParentCategoryId())) {
-                        Long parentId = Long.valueOf(category.getParentCategoryId());
-                        CategoryEntity parent = categoryRepository.findById(parentId)
-                                .orElseThrow(() -> new ProductException("Parent Category not found " + parentId, HttpStatus.NOT_FOUND.value()));
+				categoryDTO.getCategories().forEach(category -> {
+					CategoryEntity categoryEntity = new CategoryEntity();
+					categoryEntity.setCategoryName(category.getCategoryName());
 
-                        categoryEntity.setParentCategory(parent);
-                    }
+					if (StringUtils.isNotBlank(category.getParentCategoryId())) {
+						Long parentId = Long.valueOf(category.getParentCategoryId());
+						CategoryEntity parent = categoryRepository.findById(parentId)
+								.orElseThrow(() -> new ProductException("Parent Category not found " + parentId,
+										HttpStatus.NOT_FOUND.value()));
 
-                    categories.add(categoryEntity);
-                });
+						categoryEntity.setParentCategory(parent);
+					}
 
-                categoryRepository.saveAll(categories);
-                respDTO.setCode("200");
-                respDTO.setStatus(true);
-                respDTO.setMessage("Categories Added Successfully");
+					categories.add(categoryEntity);
+				});
 
-                if (categories.size() == 1) {
-                    respDTO.setMessage("Category Added Successfully");
-                }
+				categoryRepository.saveAll(categories);
+				respDTO.setCode("200");
+				respDTO.setStatus(true);
+				respDTO.setMessage("Categories Added Successfully");
 
-            }
-        } catch (Exception e) {
-            log.error(Constants.EXCEPTION, e.getMessage());
-            throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+				if (categories.size() == 1) {
+					respDTO.setMessage("Category Added Successfully");
+				}
 
-        return respDTO;
-    }
+			}
+		}
+		catch (Exception e) {
+			log.error(Constants.EXCEPTION, e.getMessage());
+			throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
 
-    @Override
-    @Transactional
-    public BaseRespDTO deleteCategory(Category category) {
-        BaseRespDTO respDTO = new BaseRespDTO();
+		return respDTO;
+	}
 
-        try {
-            if(category != null && StringUtils.isNotBlank(category.getId())) {
-                Long categoryId = Long.parseLong(category.getId());
-                CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
-                        .orElseThrow(() -> new ProductException("Category not found", HttpStatus.NOT_FOUND.value()));
+	@Override
+	@Transactional
+	public BaseRespDTO deleteCategory(Category category) {
+		BaseRespDTO respDTO = new BaseRespDTO();
 
-                if (isCategoryAssignedToProduct(categoryEntity)) {
-                    throw new ProductException("Cannot delete category: it is assigned to one or more products.", HttpStatus.FORBIDDEN.value());
-                }
+		try {
+			if (category != null && StringUtils.isNotBlank(category.getId())) {
+				Long categoryId = Long.parseLong(category.getId());
+				CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
+						.orElseThrow(() -> new ProductException("Category not found", HttpStatus.NOT_FOUND.value()));
 
-                categoryRepository.delete(categoryEntity);
+				if (isCategoryAssignedToProduct(categoryEntity)) {
+					throw new ProductException("Cannot delete category: it is assigned to one or more products.",
+							HttpStatus.FORBIDDEN.value());
+				}
 
-                respDTO.setMessage("Category Deleted Successfully");
-                respDTO.setCode("200");
-                respDTO.setStatus(true);
-            }
-        } catch (ProductException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error(Constants.EXCEPTION, e.getMessage());
-            throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+				categoryRepository.delete(categoryEntity);
 
-        return respDTO;
-    }
+				respDTO.setMessage("Category Deleted Successfully");
+				respDTO.setCode("200");
+				respDTO.setStatus(true);
+			}
+		}
+		catch (ProductException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			log.error(Constants.EXCEPTION, e.getMessage());
+			throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
 
-    private boolean isCategoryAssignedToProduct(CategoryEntity category) {
-        // Check main category
-        boolean assignedToProducts = productRepository.existsByCategory(category);
-        if (assignedToProducts) return true;
+		return respDTO;
+	}
 
-        // Check subcategories recursively
-        for (CategoryEntity sub : category.getSubCategories()) {
-            if (isCategoryAssignedToProduct(sub)) return true;
-        }
+	private boolean isCategoryAssignedToProduct(CategoryEntity category) {
+		// Check main category
+		boolean assignedToProducts = productRepository.existsByCategory(category);
+		if (assignedToProducts)
+			return true;
 
-        return false;
-    }
+		// Check subcategories recursively
+		for (CategoryEntity sub : category.getSubCategories()) {
+			if (isCategoryAssignedToProduct(sub))
+				return true;
+		}
 
-    @Override
-    public BaseRespDTO updateCategory(Category category) {
-        BaseRespDTO respDTO = new BaseRespDTO();
+		return false;
+	}
 
-        try {
-            if(category != null && StringUtils.isNotBlank(category.getId())) {
-                Long categoryId = Long.parseLong(category.getId());
-                CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
-                        .orElseThrow(() -> new ProductException("Category Not Found", HttpStatus.NOT_FOUND.value()));
+	@Override
+	public BaseRespDTO updateCategory(Category category) {
+		BaseRespDTO respDTO = new BaseRespDTO();
 
-                if(StringUtils.isNotBlank(category.getCategoryName())) {
-                    categoryEntity.setCategoryName(category.getCategoryName());
-                }
+		try {
+			if (category != null && StringUtils.isNotBlank(category.getId())) {
+				Long categoryId = Long.parseLong(category.getId());
+				CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
+						.orElseThrow(() -> new ProductException("Category Not Found", HttpStatus.NOT_FOUND.value()));
 
-                if(StringUtils.isNotBlank(category.getParentCategoryId())) {
-                    Long parentCategoryId = Long.parseLong(category.getParentCategoryId());
-                    CategoryEntity parentCategory = categoryRepository.findById(parentCategoryId)
-                            .orElseThrow(() -> new ProductException("Parent Category Not Found", HttpStatus.NOT_FOUND.value()));
+				if (StringUtils.isNotBlank(category.getCategoryName())) {
+					categoryEntity.setCategoryName(category.getCategoryName());
+				}
 
-                    categoryEntity.setParentCategory(parentCategory);
+				if (StringUtils.isNotBlank(category.getParentCategoryId())) {
+					Long parentCategoryId = Long.parseLong(category.getParentCategoryId());
+					CategoryEntity parentCategory = categoryRepository.findById(parentCategoryId).orElseThrow(
+							() -> new ProductException("Parent Category Not Found", HttpStatus.NOT_FOUND.value()));
 
-                } else if(categoryEntity.getParentCategory() != null) {
-                    categoryEntity.setParentCategory(null);
-                }
+					categoryEntity.setParentCategory(parentCategory);
 
-                categoryRepository.save(categoryEntity);
+				}
+				else if (categoryEntity.getParentCategory() != null) {
+					categoryEntity.setParentCategory(null);
+				}
 
-                respDTO.setMessage("Category Updated Successfully");
-                respDTO.setCode("200");
-                respDTO.setStatus(true);
-            }
-        } catch (Exception e) {
-            log.error(Constants.EXCEPTION, e.getMessage());
-            throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+				categoryRepository.save(categoryEntity);
 
-        return respDTO;
-    }
+				respDTO.setMessage("Category Updated Successfully");
+				respDTO.setCode("200");
+				respDTO.setStatus(true);
+			}
+		}
+		catch (Exception e) {
+			log.error(Constants.EXCEPTION, e.getMessage());
+			throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
 
-    @Override
-    public CategoryRespDTO getCategories() {
-        CategoryRespDTO categoryRespDTO = new CategoryRespDTO();
+		return respDTO;
+	}
 
-        try {
-            List<CategoryEntity> categoryList = categoryRepository.findAll();
+	@Override
+	public CategoryRespDTO getCategories() {
+		CategoryRespDTO categoryRespDTO = new CategoryRespDTO();
 
-            if(!categoryList.isEmpty()) {
-                Map<Long, CategoryDataDTO> categoryDataDTOMap = new HashMap<>();
-                List<CategoryDataDTO> categoryDataDTOList = new ArrayList<>();
+		try {
+			List<CategoryEntity> categoryList = categoryRepository.findAll();
 
-                categoryList.forEach(category -> {
-                    CategoryDataDTO categoryDataDTO = new CategoryDataDTO();
-                    categoryDataDTO.setId(category.getCategoryId());
-                    categoryDataDTO.setCategoryName(category.getCategoryName());
-                    categoryDataDTO.setSubCategories(new ArrayList<>());
-                    categoryDataDTOMap.put(category.getCategoryId(), categoryDataDTO);
-                });
+			if (!categoryList.isEmpty()) {
+				Map<Long, CategoryDataDTO> categoryDataDTOMap = new HashMap<>();
+				List<CategoryDataDTO> categoryDataDTOList = new ArrayList<>();
 
-                categoryList.forEach(category -> {
-                    CategoryDataDTO categoryDataDTO = categoryDataDTOMap.get(category.getCategoryId());
-                    CategoryEntity parent = category.getParentCategory();
+				categoryList.forEach(category -> {
+					CategoryDataDTO categoryDataDTO = new CategoryDataDTO();
+					categoryDataDTO.setId(category.getCategoryId());
+					categoryDataDTO.setCategoryName(category.getCategoryName());
+					categoryDataDTO.setSubCategories(new ArrayList<>());
+					categoryDataDTOMap.put(category.getCategoryId(), categoryDataDTO);
+				});
 
-                    if(parent != null) {
-                        CategoryDataDTO parentCategory = categoryDataDTOMap.get(parent.getCategoryId());
-                        parentCategory.getSubCategories().add(categoryDataDTO);
-                    } else {
-                        categoryDataDTOList.add(categoryDataDTO);
-                    }
-                });
+				categoryList.forEach(category -> {
+					CategoryDataDTO categoryDataDTO = categoryDataDTOMap.get(category.getCategoryId());
+					CategoryEntity parent = category.getParentCategory();
 
-                categoryRespDTO.setCategories(categoryDataDTOList);
-                categoryRespDTO.setMessage("Categories fetched Successfully");
+					if (parent != null) {
+						CategoryDataDTO parentCategory = categoryDataDTOMap.get(parent.getCategoryId());
+						parentCategory.getSubCategories().add(categoryDataDTO);
+					}
+					else {
+						categoryDataDTOList.add(categoryDataDTO);
+					}
+				});
 
-            } else {
-                categoryRespDTO.setMessage("No Categories Found");
-            }
+				categoryRespDTO.setCategories(categoryDataDTOList);
+				categoryRespDTO.setMessage("Categories fetched Successfully");
 
-            categoryRespDTO.setStatus(true);
-            categoryRespDTO.setCode(HttpStatus.OK.value());
+			}
+			else {
+				categoryRespDTO.setMessage("No Categories Found");
+			}
 
+			categoryRespDTO.setStatus(true);
+			categoryRespDTO.setCode(HttpStatus.OK.value());
 
-        } catch (Exception e) {
-            log.error(Constants.EXCEPTION, e.getMessage());
-            throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+		}
+		catch (Exception e) {
+			log.error(Constants.EXCEPTION, e.getMessage());
+			throw new ProductException(e.getCause(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
 
-        return categoryRespDTO;
-    }
+		return categoryRespDTO;
+	}
+
 }

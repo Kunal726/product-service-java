@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Tag {
-    private String id;
-    private String name;
+
+	private String id;
+
+	private String name;
+
 }

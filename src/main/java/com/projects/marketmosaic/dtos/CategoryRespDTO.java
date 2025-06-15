@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryRespDTO extends BaseRespDTO {
-    private List<CategoryDataDTO> categories;
-}
 
+	private List<CategoryDataDTO> categories;
+
+}

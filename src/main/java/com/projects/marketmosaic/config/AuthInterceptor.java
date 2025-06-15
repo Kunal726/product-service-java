@@ -44,6 +44,10 @@ public class AuthInterceptor implements HandlerInterceptor {
 		}
 
 		if (jwtToken == null) {
+			if(path.startsWith("/products")) {
+				request.setAttribute("role", "USER");
+				return true;
+			}
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().write("Missing JWT_SESSION cookie");
 			return false;
@@ -51,11 +55,13 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 		TokenValidationRespDTO result;
 
-		if(path.startsWith("/categories")) {
+		if (path.startsWith("/categories")) {
 			result = authServiceClient.validateAdmin("JWT_SESSION=" + jwtToken);
-		} else if (path.startsWith("/products")) {
+		}
+		else if (path.startsWith("/products")) {
 			result = authServiceClient.validateUser("JWT_SESSION=" + jwtToken);
-		} else {
+		}
+		else {
 			result = authServiceClient.validateSeller("JWT_SESSION=" + jwtToken);
 		}
 

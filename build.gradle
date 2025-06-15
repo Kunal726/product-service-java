@@ -40,10 +40,7 @@ ext {
 
 dependencies {
     implementation 'com.projects.marketmosaic:market-mosaic-common-lib:1.0-SNAPSHOT'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'  // Health checks and metrics
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis integration
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     implementation 'org.apache.commons:commons-lang3:3.17.0'

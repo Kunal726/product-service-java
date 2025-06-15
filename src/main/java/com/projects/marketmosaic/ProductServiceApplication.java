@@ -15,5 +15,3 @@ public class ProductServiceApplication {
 	}
 
 }
-
-// TODO("5. Token in HTTP-Only Cookies (Secure and SameSite Cookies_)")

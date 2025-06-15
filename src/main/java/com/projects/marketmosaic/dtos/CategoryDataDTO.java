@@ -5,11 +5,14 @@ import lombok.Data;
 
 import java.util.List;
 
-
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryDataDTO {
-    private Long id;
-    private String categoryName;
-    private List<CategoryDataDTO> subCategories;
+
+	private Long id;
+
+	private String categoryName;
+
+	private List<CategoryDataDTO> subCategories;
+
 }
