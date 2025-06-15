@@ -88,7 +88,6 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
 			predicates.add(criteriaBuilder.equal(productEntityRoot.get("isActive"), true));
 		}
 
-
 		if (predicates.isEmpty()) {
 			return entityManager.createQuery(criteriaQuery).getResultList();
 		}

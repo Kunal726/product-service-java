@@ -44,7 +44,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 		}
 
 		if (jwtToken == null) {
-			if(path.startsWith("/products")) {
+			if (path.startsWith("/products")) {
 				request.setAttribute("role", "USER");
 				return true;
 			}
