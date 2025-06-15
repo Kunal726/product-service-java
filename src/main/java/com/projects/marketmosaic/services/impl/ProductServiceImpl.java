@@ -1,6 +1,7 @@
 package com.projects.marketmosaic.services.impl;
 
 import com.projects.marketmosaic.common.dto.product.resp.ProductDetailsDTO;
+import com.projects.marketmosaic.common.utils.UserUtils;
 import com.projects.marketmosaic.dtos.*;
 import com.projects.marketmosaic.common.dto.product.resp.ProductRespDTO;
 import com.projects.marketmosaic.entities.ProductEntity;
@@ -10,7 +11,6 @@ import com.projects.marketmosaic.repositories.ProductRepository;
 import com.projects.marketmosaic.services.FileStorageService;
 import com.projects.marketmosaic.services.ProductService;
 import com.projects.marketmosaic.utils.ProductUtils;
-import com.projects.marketmosaic.utils.UserUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
