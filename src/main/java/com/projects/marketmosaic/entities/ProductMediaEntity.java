@@ -18,6 +18,8 @@ public class ProductMediaEntity {
 
 	private String type;
 
+	private boolean isDefault;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id")
 	private ProductEntity product;

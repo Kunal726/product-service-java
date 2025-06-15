@@ -67,6 +67,7 @@ public class ProductUtils {
 					productMedia.setUrl(productMediaEntity.getUrl());
 					productMedia.setAltText(productMediaEntity.getAltText());
 					productMedia.setType(productMediaEntity.getType());
+					productMedia.setDefault(productMediaEntity.isDefault());
 					return productMedia;
 				}).toList();
 
@@ -118,6 +119,8 @@ public class ProductUtils {
 
 	private void saveProductMedia(List<ProductDetailsDTO.ProductMedia> productMediaList, ProductEntity productEntity,
 			List<String> savedPaths, String productName) throws ProductException {
+		boolean isDefault = false;
+
 		if (productMediaList != null) {
 			for (ProductDetailsDTO.ProductMedia productMedia : productMediaList) {
 				ProductMediaEntity productMediaEntity = new ProductMediaEntity();
@@ -128,7 +131,16 @@ public class ProductUtils {
 				productMediaEntity.setAltText(productName + productMedia.getMedia().getOriginalFilename());
 				productMediaEntity.setProduct(productEntity);
 				productMediaEntity.setType(productMedia.getType());
+				productMediaEntity.setDefault(productMedia.isDefault());
+
+				if(productMedia.isDefault()) {
+					if(isDefault) {
+						throw new ProductException(HttpStatus.CONFLICT.value(), "Only single product media can be default");
+					}
+				}
+
 				productEntity.getProductMedia().add(productMediaEntity);
+				isDefault = productMedia.isDefault();
 			}
 		}
 
