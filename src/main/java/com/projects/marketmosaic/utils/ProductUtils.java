@@ -134,9 +134,10 @@ public class ProductUtils {
 				productMediaEntity.setType(productMedia.getType());
 				productMediaEntity.setDefault(productMedia.isDefault());
 
-				if(productMedia.isDefault()) {
-					if(isDefault) {
-						throw new ProductException(HttpStatus.CONFLICT.value(), "Only single product media can be default");
+				if (productMedia.isDefault()) {
+					if (isDefault) {
+						throw new ProductException(HttpStatus.CONFLICT.value(),
+								"Only single product media can be default");
 					}
 				}
 

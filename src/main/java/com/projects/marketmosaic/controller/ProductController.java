@@ -94,4 +94,12 @@ public class ProductController {
 		return ResponseEntity.ok(suggestions);
 	}
 
+	@PostMapping("/products")
+	ResponseEntity<ProductRespDTO> getProducts(@RequestBody List<String> productIds) {
+		log.info("getProducts Request : ids :: {}", productIds);
+		ProductRespDTO respDTO = productService.getProducts(productIds);
+		log.info("getProducts Response :: {} ", respDTO);
+		return ResponseEntity.ok(respDTO);
+	}
+
 }

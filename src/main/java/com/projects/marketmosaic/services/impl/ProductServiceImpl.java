@@ -258,4 +258,28 @@ public class ProductServiceImpl implements ProductService {
 		return productRepository.getProductSuggestions(query);
 	}
 
+	@Override
+	public ProductRespDTO getProducts(List<String> productIds) {
+		ProductRespDTO respDTO = new ProductRespDTO();
+
+		if (!productIds.isEmpty()) {
+
+			List<ProductEntity> productEntities = productRepository
+					.findAllById(productIds.stream().map(Long::valueOf).toList());
+
+			List<ProductDetailsDTO> productDetailsList = productEntities.stream().map(productUtils::mapProductDetails)
+					.toList();
+			respDTO.setProductList(productDetailsList);
+
+			respDTO.setStatus(true);
+			respDTO.setCode(String.valueOf(HttpStatus.OK.value()));
+			respDTO.setMessage("Product Found");
+		}
+		else {
+			throw new ProductException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Product Id cannot be empty");
+		}
+
+		return respDTO;
+	}
+
 }

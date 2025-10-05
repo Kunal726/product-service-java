@@ -30,4 +30,6 @@ public interface ProductService {
 
 	List<String> getProductSuggestions(String query);
 
+	ProductRespDTO getProducts(List<String> productIds);
+
 }
